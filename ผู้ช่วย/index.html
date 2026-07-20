@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ผู้ช่วยส่วนตัว - Personal Secretary & Discipline Tracker</title>
+  
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#8b5cf6">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="เลขาเตือนภัย">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Secretary Header Card -->
+    <div class="secretary-card">
+      <div class="secretary-header">
+        <div class="avatar-wrapper">
+          <div class="avatar-ring">
+            <div class="avatar-img" id="secretaryAvatar">👨‍💼</div>
+          </div>
+          <div class="online-badge"></div>
+        </div>
+        <div class="secretary-info">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div>
+              <div class="secretary-title">Personal Assistant</div>
+              <div class="secretary-name" id="secretaryName">เลขาอาร์ม (ARM)</div>
+            </div>
+            <button class="action-btn" id="toggleVoiceBtn">👨‍💼 เสียงชาย</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="speech-bubble">
+        <span id="secretarySpeech">กำลังโหลดข้อมูลผู้ช่วย...</span>
+        <button class="speak-btn" id="speakGreetingBtn" title="ฟังเสียงผู้ช่วย">🔊</button>
+      </div>
+    </div>
+
+    <!-- Discipline Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="disciplineScore">0%</div>
+        <div class="stat-label">ระดับวินัยวันนี้</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="taskCompletedStat">0/0</div>
+        <div class="stat-label">สำเร็จแล้ว</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="streakDaysStat">0 วัน</div>
+        <div class="stat-label">Streak ต่อเนื่อง</div>
+      </div>
+    </div>
+
+    <!-- Master Alarm Controls Bar -->
+    <div class="settings-bar">
+      <div class="setting-row">
+        <div>
+          <div class="setting-title">🔔 ระบบแจ้งเตือนหลัก (Master Alarm)</div>
+          <div class="setting-sub">อิงเวลาประเทศไทย (Asia/Bangkok UTC+7)</div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="masterNotifSwitch" checked>
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row" style="margin-top: 4px;">
+        <div class="setting-title">🎛️ โหมดการเตือน</div>
+      </div>
+
+      <div class="mode-btn-group">
+        <button class="mode-btn active" id="modeSilentBtn">🔕 เด้งข้อความอย่างเดียว</button>
+        <button class="mode-btn" id="modeBothBtn">🔊 เด้งข้อความ + เสียงพูด</button>
+      </div>
+
+      <div class="setting-row" style="margin-top: 8px;">
+        <div class="setting-title">🎭 บุคลิกภาพการพูดของผู้ช่วย</div>
+      </div>
+
+      <div class="personality-group">
+        <button class="personality-btn active" id="stylePoliteBtn">
+          <span>🎩 ผู้ช่วยผู้ดี</span>
+          <span style="font-size: 10px;">รับทราบครับเจ้านาย</span>
+        </button>
+        <button class="personality-btn" id="styleSavageBtn">
+          <span>🔥 สายเพื่อนฮาร์ดคอร์</span>
+          <span style="font-size: 10px;">อย่าอู้ดิไอ้สัส!</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Quick Action Bar -->
+    <div class="section-header">
+      <div class="section-title">
+        <span>⏰</span> ตารางเวลา & วินัยประจำวัน
+      </div>
+      <div style="display: flex; gap: 6px;">
+        <button class="action-btn" id="openAddModalBtn">➕ เพิ่มภารกิจ</button>
+      </div>
+    </div>
+
+    <!-- Timeline Container -->
+    <div class="timeline-container" id="timelineContainer">
+      <!-- Task Cards Will Be Rendered Here -->
+    </div>
+
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <div class="bottom-nav">
+    <button class="nav-item active" onclick="window.scrollTo({top: 0, behavior: 'smooth'})">
+      🏠
+      <span>หน้าหลัก</span>
+    </button>
+    <button class="nav-item" id="openRankModalBtn">
+      🏆
+      <span>ประเมินแรงค์</span>
+    </button>
+    <button class="nav-item" id="openSummarizerModalBtn">
+      📄
+      <span>สรุปตาราง</span>
+    </button>
+    <button class="nav-item" id="openImportModalBtn">
+      📥
+      <span>วางข้อความ</span>
+    </button>
+    <button class="nav-item" id="clearAllDataBtn" style="color: var(--rose);">
+      🧹
+      <span>ล้างเป็น 0</span>
+    </button>
+  </div>
+
+  <!-- Modal: Add New Task -->
+  <div class="modal-overlay" id="addModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">➕ เพิ่มภารกิจแจ้งเตือนใหม่</div>
+        <button class="close-modal" id="closeAddModalBtn">✕</button>
+      </div>
+      <form id="addTaskForm">
+        <div class="form-group">
+          <label class="form-label">เวลาเตือน (เช่น 08:30)</label>
+          <input type="time" class="form-input" id="taskTime" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">หัวข้อภารกิจ</label>
+          <input type="text" class="form-input" id="taskTitle" placeholder="เช่น ดื่มน้ำ 2 แก้ว / ออกกำลังกาย" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">คำพูด / ข้อความเตือนความจำ (ปรับแต่งเองได้)</label>
+          <input type="text" class="form-input" id="taskCustomAlert" placeholder="เช่น ได้เวลาลุกไปออกกำลังกาย 30 นาทีแล้วครับ!">
+          <div class="preset-chip-group">
+            <button type="button" class="preset-chip" onclick="app.fillPresetAlert('polite')">🎩 เติมสไตล์ผู้ดี</button>
+            <button type="button" class="preset-chip" onclick="app.fillPresetAlert('savage')">🔥 เติมสไตล์เพื่อนฮาร์ดคอร์</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">คำอธิบายเพิ่มเติม (ถ้ามี)</label>
+          <input type="text" class="form-input" id="taskDesc" placeholder="เช่น 30 นาที ยืดเส้นยืดสาย">
+        </div>
+        <div class="form-group">
+          <label class="form-label">หมวดหมู่</label>
+          <select class="form-select" id="taskTag">
+            <option value="routine">ประจำวัน (Routine)</option>
+            <option value="discipline">สร้างวินัย (Discipline)</option>
+            <option value="health">สุขภาพ (Health)</option>
+            <option value="work">การงาน (Work)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary">บันทึกภารกิจ</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Edit Task -->
+  <div class="modal-overlay" id="editModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">✏️ แก้ไขภารกิจแจ้งเตือน</div>
+        <button class="close-modal" id="closeEditModalBtn">✕</button>
+      </div>
+      <form id="editTaskForm">
+        <input type="hidden" id="editTaskId">
+        <div class="form-group">
+          <label class="form-label">เวลาเตือน (เช่น 08:30)</label>
+          <input type="time" class="form-input" id="editTaskTime" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">หัวข้อภารกิจ</label>
+          <input type="text" class="form-input" id="editTaskTitle" placeholder="เช่น ดื่มน้ำ 2 แก้ว / ออกกำลังกาย" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">คำพูด / ข้อความเตือนความจำ (ปรับแต่งเองได้)</label>
+          <input type="text" class="form-input" id="editTaskCustomAlert" placeholder="เช่น ได้เวลาลุกไปออกกำลังกาย 30 นาทีแล้วครับ!">
+          <div class="preset-chip-group">
+            <button type="button" class="preset-chip" onclick="app.fillEditPresetAlert('polite')">🎩 เติมสไตล์ผู้ดี</button>
+            <button type="button" class="preset-chip" onclick="app.fillEditPresetAlert('savage')">🔥 เติมสไตล์เพื่อนฮาร์ดคอร์</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">คำอธิบายเพิ่มเติม (ถ้ามี)</label>
+          <input type="text" class="form-input" id="editTaskDesc" placeholder="เช่น 30 นาที ยืดเส้นยืดสาย">
+        </div>
+        <div class="form-group">
+          <label class="form-label">หมวดหมู่</label>
+          <select class="form-select" id="editTaskTag">
+            <option value="routine">ประจำวัน (Routine)</option>
+            <option value="discipline">สร้างวินัย (Discipline)</option>
+            <option value="health">สุขภาพ (Health)</option>
+            <option value="work">การงาน (Work)</option>
+          </select>
+        </div>
+        <button type="submit" class="btn-primary">บันทึกการแก้ไข</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 1: Visual Schedule Summary Table (📄 สรุปตาราง) -->
+  <div class="modal-overlay" id="summarizerModal">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <div class="modal-title">📄 ตารางสรุปภาพรวมตารางเวลา</div>
+        <button class="close-modal" id="closeSummarizerModalBtn">✕</button>
+      </div>
+      
+      <div id="summaryTableContainer" class="summary-table-container">
+        <!-- HTML Data Table rendered here -->
+      </div>
+
+      <div style="margin-top: 16px;">
+        <label class="form-label">วางข้อความเรื่องราวเพิ่มเติมเพื่ออัปเดตตารางสรุป</label>
+        <textarea class="form-textarea" id="summarizerText" rows="4" placeholder="ตัวอย่างข้อความ:&#10;ตื่นนอน 07.00 น. ออกกำลังกาย 08.30 น. ทานข้าวเที่ยง 12.00 น. เข้านอน 23.00 น."></textarea>
+      </div>
+      <button type="button" class="btn-primary" id="generateVisualSummaryBtn" style="margin-top: 10px;">✨ แปลงข้อความเป็นตารางสรุป</button>
+    </div>
+  </div>
+
+  <!-- Modal 2: AI Interactive Text Analyzer (📥 วางข้อความ) -->
+  <div class="modal-overlay" id="importModal">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <div class="modal-title">📥 AI วิเคราะห์ข้อความ & แก้ไขก่อนบันทึก</div>
+        <button class="close-modal" id="closeImportModalBtn">✕</button>
+      </div>
+
+      <div id="aiInputSection">
+        <div class="form-group">
+          <label class="form-label">วางข้อความแชท/โน้ตของคุณที่นี่</label>
+          <textarea class="form-textarea" id="importRawText" rows="6" placeholder="ตัวอย่างข้อความ:&#10;พรุ่งนี้เช้า 08:30 น. อย่าลืมตื่นมาวิ่งออกกำลังกายรอบหมู่บ้านสัก 3 กม. นะ แล้วค่อยกินข้าวเช้า&#10;บ่ายสอง 14:00 น. มีประชุมทีมการตลาดแผนงาน Q3 ที่ห้องประชุมใหญ่"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">สไตล์คำพูดผู้ช่วยสำหรับรายการที่สกัดได้</label>
+          <select class="form-select" id="importStyleSelect">
+            <option value="polite">🎩 ผู้ช่วยผู้ดี (ครับเจ้านาย! / รับทราบครับเจ้านาย)</option>
+            <option value="savage">🔥 ผู้ช่วยสายเพื่อนฮาร์ดคอร์ (อย่าอู้ดิไอ้สัส! / ลุกได้แล้วมึง)</option>
+          </select>
+        </div>
+        <button type="button" class="btn-primary" id="startAnalyzeBtn">🤖 วิเคราะห์สกัดเป็นข้อๆ</button>
+      </div>
+
+      <!-- Interactive Preview List Section (Initially Hidden until Analyzed) -->
+      <div id="aiPreviewSection" style="display: none;">
+        <div style="font-size: 13px; color: var(--cyan); font-weight: 600; margin-bottom: 8px;">
+          ✨ AI สกัดกิจกรรมได้แล้ว คุณสามารถปรับแก้เวลา/คำพูดได้ก่อนบันทึก:
+        </div>
+
+        <div id="aiPreviewList" class="preview-list">
+          <!-- Rendered itemized editable cards -->
+        </div>
+
+        <div style="display: flex; gap: 8px; margin-top: 16px;">
+          <button type="button" class="btn-secondary" id="backToInputBtn">↩️ วางข้อความใหม่</button>
+          <button type="button" class="btn-primary" id="confirmSaveAllBtn">✅ ยืนยันบันทึกทั้งหมดเข้าตารางเตือน</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modal 3: World-Class Rank Assessment (🏆 ประเมินแรงค์) -->
+  <div class="modal-overlay" id="rankModal">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <div class="modal-title">🏆 ประเมินแรงค์ผู้พิชิตวินัยระดับโลก</div>
+        <button class="close-modal" id="closeRankModalBtn">✕</button>
+      </div>
+
+      <div class="rank-card" id="rankCard" style="margin-top: 0;">
+        <div class="rank-header">
+          <div class="rank-badge-box">
+            <span class="rank-icon" id="rankIcon">👑</span>
+            <div>
+              <div class="rank-title" id="rankTitle">👑 S+ Rank: ระดับมหาเทพโลก</div>
+              <div class="rank-subtitle" id="rankSubtitle">เกณฑ์ประเมินวินัยคนสำเร็จระดับโลก</div>
+            </div>
+          </div>
+          <button type="button" class="rank-speech-btn" id="speakRankBtn" title="ฟังผู้ช่วยประเมินผล">
+            🔊 ฟังผลประเมิน
+          </button>
+        </div>
+
+        <div class="rank-progress-wrapper">
+          <div class="rank-progress-info">
+            <span>ความสำเร็จของภารกิจวันนี้</span>
+            <span id="rankPercentText">100% (0/0)</span>
+          </div>
+          <div class="rank-progress-bar">
+            <div class="rank-progress-fill" id="rankProgressFill" style="width: 0%;"></div>
+          </div>
+        </div>
+
+        <div class="rank-details">
+          <div class="rank-box praise-box">
+            <div class="rank-box-title">🌟 คำชมเชยสร้างกำลังใจ (World-Class Mindset):</div>
+            <div class="rank-box-content" id="rankPraiseText">เตรียมลุยภารกิจวันนี้ครับเจ้านาย!</div>
+          </div>
+          <div class="rank-grid">
+            <div class="rank-box benefit-box">
+              <div class="rank-box-title">⚡ ผลลัพธ์ที่จะได้รับ:</div>
+              <div class="rank-box-content" id="rankBenefitsText">สมองกระปรี้กระเปร่า โดพามีนสมดุล</div>
+            </div>
+            <div class="rank-box advice-box">
+              <div class="rank-box-title">💡 คำแนะนำระดับโลก:</div>
+              <div class="rank-box-content" id="rankAdviceText">เริ่มทำภารกิจแรกเพื่อจุดไฟวินัยทันที!</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="speech.js"></script>
+  <script src="notifications.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
