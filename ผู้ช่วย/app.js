@@ -880,20 +880,25 @@ class DisciplineApp {
     });
 
     // Step 1: Subscribe OneSignal Cloud Push Button
-    document.getElementById('subscribeOneSignalBtn')?.addEventListener('click', () => {
-      if (window.OneSignalDeferred) {
-        window.OneSignalDeferred.push(async function(OneSignal) {
-          try {
-            await OneSignal.Notifications.requestPermission();
+    document.getElementById('subscribeOneSignalBtn')?.addEventListener('click', async () => {
+      try {
+        if (window.OneSignal && window.OneSignal.Notifications) {
+          const perm = await window.OneSignal.Notifications.requestPermission();
+          await window.OneSignal.User.pushSubscription.optIn();
+          const subId = window.OneSignal.User.pushSubscription.id;
+          alert('✅ ลงทะเบียน iPad เข้าสู่คลาวด์สำเร็จเรียบร้อยครับ!\n\n(ID เครื่องของคุณ: ' + (subId || 'อนุมัติเรียบร้อย') + ')\n\nจากนั้นกดปุ่ม Step 2 ด้านล่างเพื่อทดสอบได้เลยครับ!');
+        } else if (window.OneSignalDeferred) {
+          window.OneSignalDeferred.push(async function(OneSignal) {
+            const perm = await OneSignal.Notifications.requestPermission();
             await OneSignal.User.pushSubscription.optIn();
             const subId = OneSignal.User.pushSubscription.id;
             alert('✅ ลงทะเบียน iPad เข้าสู่คลาวด์สำเร็จเรียบร้อยครับ!\n\n(ID เครื่องของคุณ: ' + (subId || 'อนุมัติเรียบร้อย') + ')\n\nจากนั้นกดปุ่ม Step 2 ด้านล่างเพื่อทดสอบได้เลยครับ!');
-          } catch(err) {
-            alert('⚠️ เกิดข้อผิดพลาดในการลงทะเบียน: ' + err.message);
-          }
-        });
-      } else {
-        alert('OneSignal SDK กำลังโหลด กรุณาลองใหม่อีกครั้งใน 3 วินาที');
+          });
+        } else {
+          alert('OneSignal SDK กำลังโหลด กรุณาลองใหม่อีกครั้งใน 3 วินาที');
+        }
+      } catch(err) {
+        alert('⚠️ เกิดข้อผิดพลาดในการลงทะเบียน: ' + err.message);
       }
     });
 
