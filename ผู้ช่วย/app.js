@@ -879,6 +879,14 @@ class DisciplineApp {
       }
     });
 
+    // Instant Cloud Push Test Button
+    document.getElementById('testCloudPushBtn')?.addEventListener('click', () => {
+      window.notificationEngine.sendInstantCloudPush(
+        '🔔 ทดสอบเด้งเตือนคลาวด์ลง iPad!',
+        'สัญญาณเตือนทดสอบยิงตรงลงหน้าจอ iPad ขณะพับปิดหน้าจอครับ'
+      );
+    });
+
     // Auto-sync & trigger alarms when waking up screen / unlocking phone
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) {

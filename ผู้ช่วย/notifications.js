@@ -111,6 +111,36 @@ class NotificationEngine {
       console.log('Cloud push error:', e);
     }
   }
+
+  async sendInstantCloudPush(title, body) {
+    try {
+      const payload = {
+        app_id: "e998a77d-d6c4-4409-b243-671fb7279f86",
+        included_segments: ["Subscribed Users"],
+        target_channel: "push",
+        headings: { th: title, en: title },
+        contents: { th: body, en: body }
+      };
+
+      const res = await fetch('https://onesignal.com/api/v1/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Authorization': 'Basic ' + atob('b3NfdjJfYXBwXzVnbWtvN293eXJjYXRtc2RtNHAzb2o0N3F5ZHJidm1xYXVlZWNhdjV1dXVqNWgyeDU1N2l4a2J4cWtvcXRlbGJoa2kzcWl3cnVmZXhiNmtzNW96emZ0M3RrNjVyd3NicmZldWY0Z3E=')
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      console.log('OneSignal Instant Push Response:', data);
+      if (data.id) {
+        alert('⚡ สั่งยิงคลาวด์สำเร็จ! ลองกดพับปิดหน้าจอ iPad ภายใน 3 วินาที เพื่อรอดูป้ายเตือนเด้งขึ้นมาได้เลยครับ!');
+      } else {
+        alert('⚠️ ข้อมูลตอบกลับจาก OneSignal: ' + JSON.stringify(data));
+      }
+    } catch(e) {
+      alert('Error: ' + e.message);
+    }
+  }
 }
 
 window.notificationEngine = new NotificationEngine();
