@@ -5,6 +5,7 @@ class DisciplineApp {
     this.tasks = JSON.parse(localStorage.getItem('secretary_tasks')) || [];
     this.streakDays = parseInt(localStorage.getItem('secretary_streak') || '0');
     this.masterNotifEnabled = JSON.parse(localStorage.getItem('secretary_master_notif') ?? 'true');
+    this.backgroundModeEnabled = JSON.parse(localStorage.getItem('secretary_background_mode') ?? 'false');
     this.notifMode = localStorage.getItem('secretary_notif_mode') || 'silent'; // 'silent' or 'both'
     this.secretaryStyle = localStorage.getItem('secretary_style') || 'polite'; // 'polite' or 'savage'
     this.lastTriggeredTime = '';
@@ -13,6 +14,9 @@ class DisciplineApp {
 
   init() {
     window.secretaryAudio.onStateChange = () => this.updateAudioButtonsUI();
+    if (this.backgroundModeEnabled) {
+      window.secretaryAudio.enableBackgroundKeepAlive();
+    }
     this.updateVoiceUI();
     this.updateSettingsUI();
     this.renderHeaderGreeting();
@@ -27,6 +31,7 @@ class DisciplineApp {
     localStorage.setItem('secretary_tasks', JSON.stringify(this.tasks));
     localStorage.setItem('secretary_streak', this.streakDays.toString());
     localStorage.setItem('secretary_master_notif', JSON.stringify(this.masterNotifEnabled));
+    localStorage.setItem('secretary_background_mode', JSON.stringify(this.backgroundModeEnabled));
     localStorage.setItem('secretary_notif_mode', this.notifMode);
     localStorage.setItem('secretary_style', this.secretaryStyle);
   }
@@ -51,6 +56,9 @@ class DisciplineApp {
   updateSettingsUI() {
     const switchEl = document.getElementById('masterNotifSwitch');
     if (switchEl) switchEl.checked = this.masterNotifEnabled;
+
+    const bgSwitchEl = document.getElementById('backgroundModeSwitch');
+    if (bgSwitchEl) bgSwitchEl.checked = this.backgroundModeEnabled;
 
     const silentBtn = document.getElementById('modeSilentBtn');
     const bothBtn = document.getElementById('modeBothBtn');
@@ -830,11 +838,17 @@ class DisciplineApp {
       }
     });
 
-    // Enable Background Lock Screen Mode Button
-    document.getElementById('enableBackgroundModeBtn')?.addEventListener('click', () => {
-      window.notificationEngine.requestPermission();
-      window.secretaryAudio.enableBackgroundKeepAlive();
-      alert('⚡ เปิดโหมดรักษาสัญญาณแจ้งเตือนขณะปิดหน้าจอเรียบร้อยแล้วครับ!\n\n💡 คำแนะนำเพิ่มเติมสำหรับโทรศัพท์มือถือ & iPad:\n1. ตรวจสอบให้แน่ใจว่าได้กด "อนุญาต" การแจ้งเตือน Notification แล้ว\n2. สวิตช์ปิดเสียงข้างเครื่อง (Mute Switch) ต้องไม่ปิดไว้\n3. เพิ่มแอปเข้าหน้าจอหลัก (Add to Home Screen) เพื่อความสมบูรณ์แบบสูงสุดครับ');
+    // Enable/Disable Background Lock Screen Mode Switch
+    document.getElementById('backgroundModeSwitch')?.addEventListener('change', (e) => {
+      this.backgroundModeEnabled = e.target.checked;
+      this.saveData();
+      if (this.backgroundModeEnabled) {
+        window.notificationEngine.requestPermission();
+        window.secretaryAudio.enableBackgroundKeepAlive();
+        alert('🔒 เปิดโหมดเด้งเตือนตอนปิดจอสำเร็จ!\n\n💡 คำแนะนำสำหรับมือถือ & iPad:\n1. อนุญาต Notification แล้ว\n2. สวิตช์เสียงข้างเครื่องต้องไม่ Mute อยู่\n3. เพิ่มแอปเข้าหน้าจอหลัก (Add to Home Screen)');
+      } else {
+        window.secretaryAudio.disableBackgroundKeepAlive();
+      }
     });
 
     // Auto-sync & trigger alarms when waking up screen / unlocking phone
