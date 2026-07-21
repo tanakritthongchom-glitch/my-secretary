@@ -114,13 +114,25 @@ class NotificationEngine {
 
   async sendInstantCloudPush(title, body) {
     try {
+      let subId = null;
+      try {
+        if (window.OneSignal && window.OneSignal.User && window.OneSignal.User.pushSubscription) {
+          subId = window.OneSignal.User.pushSubscription.id;
+        }
+      } catch(e) {}
+
       const payload = {
         app_id: "e998a77d-d6c4-4409-b243-671fb7279f86",
-        included_segments: ["Subscribed Users"],
         target_channel: "push",
         headings: { th: title, en: title },
         contents: { th: body, en: body }
       };
+
+      if (subId) {
+        payload.include_subscription_ids = [subId];
+      } else {
+        payload.included_segments = ["Subscribed Users", "Total Subscriptions", "All"];
+      }
 
       const res = await fetch('https://onesignal.com/api/v1/notifications', {
         method: 'POST',
@@ -133,9 +145,9 @@ class NotificationEngine {
       const data = await res.json();
       console.log('OneSignal Instant Push Response:', data);
       if (data.id) {
-        alert('⚡ สั่งยิงคลาวด์สำเร็จ! ลองกดพับปิดหน้าจอ iPad ภายใน 3 วินาที เพื่อรอดูป้ายเตือนเด้งขึ้นมาได้เลยครับ!');
+        alert('⚡ สั่งยิงคลาวด์ลง iPad สำเร็จ! (ส่งตรงลงอุปกรณ์เรียบร้อยแล้ว)\n\nลองกดพับปิดหน้าจอ iPad ภายใน 3 วินาที เพื่อรอดูป้ายเตือนเด้งขึ้นมาได้เลยครับ!');
       } else {
-        alert('⚠️ ข้อมูลตอบกลับจาก OneSignal: ' + JSON.stringify(data));
+        alert('⚠️ OneSignal แจ้งเตือน: ' + JSON.stringify(data));
       }
     } catch(e) {
       alert('Error: ' + e.message);

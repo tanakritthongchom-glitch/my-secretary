@@ -28,6 +28,10 @@
           enable: false
         }
       });
+      try {
+        await OneSignal.Notifications.requestPermission();
+        await OneSignal.User.pushSubscription.optIn();
+      } catch(e) { console.log('OneSignal init optIn error:', e); }
     });
   </script>
 </head>
