@@ -25,6 +25,7 @@ class DisciplineApp {
     this.startScheduler();
     this.bindEvents();
     this.registerServiceWorker();
+    this.syncTasksWithServiceWorker();
   }
 
   saveData() {
@@ -34,6 +35,16 @@ class DisciplineApp {
     localStorage.setItem('secretary_background_mode', JSON.stringify(this.backgroundModeEnabled));
     localStorage.setItem('secretary_notif_mode', this.notifMode);
     localStorage.setItem('secretary_style', this.secretaryStyle);
+    this.syncTasksWithServiceWorker();
+  }
+
+  syncTasksWithServiceWorker() {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SYNC_TASKS',
+        tasks: this.tasks
+      });
+    }
   }
 
   updateVoiceUI() {

@@ -27,6 +27,8 @@ self.addEventListener('fetch', (e) => {
   );
 });
 
+let scheduledTimers = [];
+
 self.addEventListener('message', (e) => {
   if (e.data && e.data.type === 'SCHEDULE_NOTIFICATION') {
     const title = e.data.title || '⏰ เตือนความจำ';
@@ -34,12 +36,48 @@ self.addEventListener('message', (e) => {
       body: e.data.body || 'ได้เวลาทำภารกิจแล้วครับ!',
       icon: './icon-192.png',
       badge: './icon-192.png',
-      vibrate: [300, 100, 300, 100, 300],
+      vibrate: [500, 200, 500, 200, 1000],
       renotify: true,
       tag: e.data.taskId || 'alarm-tag',
       data: { taskId: e.data.taskId }
     };
     self.registration.showNotification(title, options);
+  }
+
+  if (e.data && e.data.type === 'SYNC_TASKS') {
+    // Clear old timers
+    scheduledTimers.forEach(timer => clearTimeout(timer));
+    scheduledTimers = [];
+
+    const tasks = e.data.tasks || [];
+    const now = new Date();
+
+    tasks.forEach(task => {
+      if (!task.time || task.done || task.active === false) return;
+
+      const [hrs, mins] = task.time.split(':').map(Number);
+      const targetDate = new Date();
+      targetDate.setHours(hrs, mins, 0, 0);
+
+      let delay = targetDate.getTime() - now.getTime();
+      if (delay < 0) return; // Passed already today
+
+      const timer = setTimeout(() => {
+        const title = `⏰ เตือนความจำเวลา (${task.time} น.)`;
+        const body = task.customAlert || `ได้เวลา ${task.title} แล้วครับ!`;
+        self.registration.showNotification(title, {
+          body: body,
+          icon: './icon-192.png',
+          badge: './icon-192.png',
+          vibrate: [500, 200, 500, 200, 1000],
+          renotify: true,
+          tag: task.id || 'alarm-tag',
+          data: { taskId: task.id }
+        });
+      }, delay);
+
+      scheduledTimers.push(timer);
+    });
   }
 });
 
