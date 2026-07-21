@@ -881,6 +881,7 @@ class DisciplineApp {
 
     // Step 1: Subscribe OneSignal Cloud Push Button
     document.getElementById('subscribeOneSignalBtn')?.addEventListener('click', async () => {
+      alert('📲 กำลังเชื่อมต่อระบบคลาวด์...\nสิทธิ์ปัจจุบัน (Permission): ' + (window.Notification ? Notification.permission : 'ไม่รองรับ'));
       try {
         if (window.OneSignal && window.OneSignal.Notifications) {
           const perm = await window.OneSignal.Notifications.requestPermission();
