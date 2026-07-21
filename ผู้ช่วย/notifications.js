@@ -14,14 +14,17 @@ class NotificationEngine {
   }
 
   async requestPermission() {
-    if (window.OneSignalDeferred) {
+    if (window.OneSignal && window.OneSignal.Notifications) {
+      try {
+        await window.OneSignal.Notifications.requestPermission();
+        await window.OneSignal.User.pushSubscription.optIn();
+      } catch(e) {}
+    } else if (window.OneSignalDeferred) {
       window.OneSignalDeferred.push(async function(OneSignal) {
         try {
           await OneSignal.Notifications.requestPermission();
-          if (OneSignal.Slidedown) {
-            await OneSignal.Slidedown.promptPush();
-          }
-        } catch(e) { console.log('OneSignal permission error:', e); }
+          await OneSignal.User.pushSubscription.optIn();
+        } catch(e) {}
       });
     }
 
@@ -32,10 +35,6 @@ class NotificationEngine {
     const result = await Notification.requestPermission();
     if (result === 'granted') {
       this.permissionGranted = true;
-      this.sendNotification('เปิดใช้งานระบบแจ้งเตือนสำเร็จ!', 'ผู้ช่วยจะคอยเด้งเตือนคุณตามตารางเวลาสร้างวินัยนะคะ');
-      if (window.secretaryAudio) {
-        window.secretaryAudio.speak('เปิดการแจ้งเตือนเรียบร้อยแล้วค่ะ ผู้ช่วยพร้อมดูแลตารางเวลาของคุณแล้วนะคะ');
-      }
       return true;
     } else {
       alert('กรุณาอนุญาตการแจ้งเตือนในการตั้งค่าเบราว์เซอร์เพื่อให้ผู้ช่วยเด้งเตือนได้ครับ');
