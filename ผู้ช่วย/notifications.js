@@ -18,6 +18,9 @@ class NotificationEngine {
       window.OneSignalDeferred.push(async function(OneSignal) {
         try {
           await OneSignal.Notifications.requestPermission();
+          if (OneSignal.Slidedown) {
+            await OneSignal.Slidedown.promptPush();
+          }
         } catch(e) { console.log('OneSignal permission error:', e); }
       });
     }
