@@ -64,6 +64,48 @@ class NotificationEngine {
       new Notification(title, options);
     }
   }
+
+  async scheduleCloudPushNotification(timeStr, title, body) {
+    try {
+      const [hrs, mins] = timeStr.split(':').map(Number);
+      const now = new Date();
+      const target = new Date();
+      target.setHours(hrs, mins, 0, 0);
+
+      if (target.getTime() <= now.getTime()) {
+        target.setDate(target.getDate() + 1);
+      }
+
+      const year = target.getFullYear();
+      const month = String(target.getMonth() + 1).padStart(2, '0');
+      const day = String(target.getDate()).padStart(2, '0');
+      const hStr = String(target.getHours()).padStart(2, '0');
+      const mStr = String(target.getMinutes()).padStart(2, '0');
+      const sendAfterStr = `${year}-${month}-${day} ${hStr}:${mStr}:00 GMT+0700`;
+
+      const payload = {
+        app_id: "e998a77d-d6c4-4409-b243-671fb7279f86",
+        included_segments: ["Subscribed Users"],
+        target_channel: "push",
+        headings: { th: `⏰ เตือนความจำเวลา (${timeStr} น.)`, en: `⏰ Alarm (${timeStr})` },
+        contents: { th: body || `ถึงเวลา ${title} แล้วครับ!`, en: body || `Time for ${title}` },
+        send_after: sendAfterStr
+      };
+
+      fetch('https://onesignal.com/api/v1/notifications', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+          'Authorization': 'Basic ' + atob('b3NfdjJfYXBwXzVnbWtvN293eXJjYXRtc2RtNHAzb2o0N3F5ZHJidm1xYXVlZWNhdjV1dXVqNWgyeDU1N2l4a2J4cWtvcXRlbGJoa2kzcWl3cnVmZXhiNmtzNW96emZ0M3RrNjVyd3NicmZldWY0Z3E=')
+        },
+        body: JSON.stringify(payload)
+      }).then(res => res.json()).then(data => {
+        console.log('OneSignal Cloud Push Scheduled:', data);
+      }).catch(err => console.log('OneSignal Schedule Error:', err));
+    } catch(e) {
+      console.log('Cloud push error:', e);
+    }
+  }
 }
 
 window.notificationEngine = new NotificationEngine();
