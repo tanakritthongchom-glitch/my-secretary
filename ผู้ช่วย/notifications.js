@@ -14,6 +14,14 @@ class NotificationEngine {
   }
 
   async requestPermission() {
+    if (window.OneSignalDeferred) {
+      window.OneSignalDeferred.push(async function(OneSignal) {
+        try {
+          await OneSignal.Notifications.requestPermission();
+        } catch(e) { console.log('OneSignal permission error:', e); }
+      });
+    }
+
     if (!('Notification' in window)) {
       alert('เบราว์เซอร์นี้ไม่รองรับการแจ้งเตือน Push Notification ครับ');
       return false;
