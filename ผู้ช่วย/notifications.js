@@ -44,7 +44,7 @@ class NotificationEngine {
   }
 
   sendNotification(title, body, taskId = null) {
-    if (!this.permissionGranted && Notification.permission !== 'granted') {
+    if (Notification.permission !== 'granted') {
       console.log('Notification permission not granted');
       return;
     }
@@ -59,12 +59,14 @@ class NotificationEngine {
       data: { taskId: taskId }
     };
 
-    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+    if ('serviceWorker' in navigator) {
       navigator.serviceWorker.ready.then(registration => {
         registration.showNotification(title, options);
+      }).catch(() => {
+        try { new Notification(title, options); } catch(e) {}
       });
     } else {
-      new Notification(title, options);
+      try { new Notification(title, options); } catch(e) {}
     }
   }
 

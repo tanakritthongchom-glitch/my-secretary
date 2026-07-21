@@ -45,6 +45,19 @@ class DisciplineApp {
         tasks: this.tasks
       });
     }
+
+    // Schedule OneSignal Cloud Push for active tasks
+    if (window.notificationEngine && window.notificationEngine.scheduleCloudPushNotification) {
+      this.tasks.forEach(task => {
+        if (task.time && !task.done && task.active !== false) {
+          window.notificationEngine.scheduleCloudPushNotification(
+            task.time,
+            task.title,
+            task.customAlert
+          );
+        }
+      });
+    }
   }
 
   updateVoiceUI() {
@@ -387,12 +400,16 @@ class DisciplineApp {
     matchingTasks.forEach(task => {
       const alertMessage = task.customAlert || this.generateAlertText(task.title);
 
-      // Always send Pop-up Notification if permission granted
-      window.notificationEngine.sendNotification(
-        `⏰ เตือนความจำเวลา (${task.time} น.)`,
-        alertMessage,
-        task.id
-      );
+      // Always send Pop-up Notification safely
+      try {
+        window.notificationEngine.sendNotification(
+          `⏰ เตือนความจำเวลา (${task.time} น.)`,
+          alertMessage,
+          task.id
+        );
+      } catch (err) {
+        console.log('Notification send error:', err);
+      }
 
       // Trigger Thai Voice Speech ONLY if mode is 'both'
       if (this.notifMode === 'both') {
