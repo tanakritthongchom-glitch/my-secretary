@@ -323,14 +323,42 @@ class DisciplineApp {
     return `${hrs}:${mins}`;
   }
 
+  updateLiveClock() {
+    const now = new Date();
+    const hrs = String(now.getHours()).padStart(2, '0');
+    const mins = String(now.getMinutes()).padStart(2, '0');
+    const secs = String(now.getSeconds()).padStart(2, '0');
+    
+    const digitsEl = document.getElementById('liveClockDigits');
+    if (digitsEl) {
+      digitsEl.innerText = `${hrs}:${mins}:${secs}`;
+    }
+
+    const dateEl = document.getElementById('liveClockDate');
+    if (dateEl) {
+      const days = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
+      const months = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'];
+      
+      const dayName = days[now.getDay()];
+      const dayNum = now.getDate();
+      const monthName = months[now.getMonth()];
+      const yearBE = now.getFullYear() + 543;
+      
+      dateEl.innerText = `วัน${dayName}ที่ ${dayNum} ${monthName} พ.ศ. ${yearBE}`;
+    }
+  }
+
   startScheduler() {
+    this.updateLiveClock();
     setInterval(() => {
+      this.updateLiveClock();
+
       const nowStr = this.getCurrentTimeString();
       if (nowStr !== this.lastTriggeredTime) {
         this.checkScheduleAlarms(nowStr);
         this.lastTriggeredTime = nowStr;
       }
-    }, 10000);
+    }, 1000);
   }
 
   checkScheduleAlarms(currentTimeStr) {

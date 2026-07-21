@@ -59,6 +59,65 @@ body {
   gap: 20px;
 }
 
+/* Real-Time Master Clock Card */
+.realtime-clock-card {
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.9), rgba(30, 27, 75, 0.85));
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  border-radius: var(--radius-xl);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 8px 24px rgba(6, 182, 212, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.realtime-clock-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--cyan), var(--emerald));
+}
+
+.clock-icon {
+  font-size: 34px;
+  filter: drop-shadow(0 0 10px rgba(6, 182, 212, 0.5));
+}
+
+.clock-main-info {
+  flex-grow: 1;
+}
+
+.live-clock-digits {
+  font-family: var(--font-num);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  background: linear-gradient(90deg, #38bdf8, #818cf8, #a7f3d0);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  line-height: 1.1;
+  text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+}
+
+.live-clock-date {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.clock-tz-badge {
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(6, 182, 212, 0.2);
+  color: var(--cyan);
+  border: 1px solid rgba(6, 182, 212, 0.4);
+  padding: 4px 8px;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
 /* Header & Avatar Card */
 .secretary-card {
   background: var(--bg-card);
@@ -914,6 +973,88 @@ input:checked + .slider:before {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
+}
+
+/* iPad / Tablet Responsive Layout Enhancements (768px+) */
+@media (min-width: 768px) {
+  .app-container {
+    max-width: 780px;
+    padding: 28px 24px;
+    gap: 24px;
+  }
+
+  .realtime-clock-card {
+    padding: 20px 28px;
+  }
+
+  .live-clock-digits {
+    font-size: 36px;
+  }
+
+  .live-clock-date {
+    font-size: 14px;
+  }
+
+  .secretary-card {
+    padding: 24px;
+  }
+
+  .secretary-name {
+    font-size: 24px;
+  }
+
+  .speech-bubble {
+    font-size: 15px;
+    padding: 14px 18px;
+  }
+
+  .stat-card {
+    padding: 18px 14px;
+  }
+
+  .stat-value {
+    font-size: 28px;
+  }
+
+  .stat-label {
+    font-size: 12px;
+  }
+
+  .timeline-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .task-card {
+    padding: 18px;
+  }
+
+  .bottom-nav {
+    max-width: 600px;
+    padding: 12px 28px;
+    bottom: 24px;
+  }
+
+  .nav-item {
+    font-size: 22px;
+    padding: 8px 20px;
+  }
+
+  .nav-item span {
+    font-size: 12px;
+  }
+
+  .modal-content {
+    max-width: 540px !important;
+    padding: 28px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .app-container {
+    max-width: 960px;
+  }
 }
 
 
