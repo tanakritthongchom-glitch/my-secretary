@@ -21,6 +21,17 @@ class AudioSecretary {
         this.keepAliveAudio = new Audio(silentUri);
         this.keepAliveAudio.loop = true;
       }
+      
+      if ('mediaSession' in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: '🔒 ผู้ช่วยส่วนตัว (โหมดเตือนขณะพับจอ)',
+          artist: 'Personal Secretary Master Alarm',
+          album: 'Discipline Secretary'
+        });
+        navigator.mediaSession.setActionHandler('play', () => { this.keepAliveAudio.play(); });
+        navigator.mediaSession.setActionHandler('pause', () => { this.keepAliveAudio.pause(); });
+      }
+
       this.keepAliveAudio.play().then(() => {
         console.log('Background Keep-Alive Audio active for lock screen alarms');
       }).catch(err => console.log('Keep-alive play error (needs user interaction):', err));

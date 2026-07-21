@@ -1,4 +1,5 @@
-// Service Worker for Personal Secretary PWA
+// Service Worker for Personal Secretary PWA & OneSignal Cloud Push
+importScripts('https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js');
 
 const CACHE_NAME = 'secretary-v1';
 const ASSETS = [
@@ -25,6 +26,27 @@ self.addEventListener('fetch', (e) => {
   e.respondWith(
     caches.match(e.request).then((res) => res || fetch(e.request))
   );
+});
+
+self.addEventListener('push', (e) => {
+  let data = { title: '⏰ เตือนความจำผู้ช่วย', body: 'ได้เวลาทำภารกิจแล้วครับเจ้านาย!' };
+  if (e.data) {
+    try {
+      data = e.data.json();
+    } catch(err) {
+      data.body = e.data.text();
+    }
+  }
+  const options = {
+    body: data.body,
+    icon: './icon-192.png',
+    badge: './icon-192.png',
+    vibrate: [500, 200, 500, 200, 1000],
+    renotify: true,
+    tag: data.tag || 'cloud-push-alarm',
+    data: data
+  };
+  e.waitUntil(self.registration.showNotification(data.title, options));
 });
 
 let scheduledTimers = [];
