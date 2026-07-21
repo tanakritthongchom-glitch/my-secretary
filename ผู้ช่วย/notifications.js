@@ -152,6 +152,35 @@ class NotificationEngine {
       alert('Error: ' + e.message);
     }
   }
+
+  async sendLineNotify(message, customToken = null) {
+    const token = customToken || localStorage.getItem('secretary_line_token');
+    if (!token) {
+      alert('กรุณากรอกและบันทึก LINE Notify Token ก่อนครับ');
+      return;
+    }
+
+    try {
+      const response = await fetch('https://corsproxy.io/?https://notify-api.line.me/api/notify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Bearer ${token}`
+        },
+        body: new URLSearchParams({ message: message })
+      });
+      const data = await response.json();
+      console.log('LINE Notify Response:', data);
+      if (data.status === 200) {
+        alert('💬 สั่งยิงข้อความเข้าแอป LINE บน iPad สำเร็จ! เช็คป้ายเด้งในแอป LINE ได้เลยครับ!');
+      } else {
+        alert('⚠️ LINE Notify ตอบกลับ: ' + data.message);
+      }
+      return data;
+    } catch(err) {
+      alert('⚠️ เกิดข้อผิดพลาดส่ง LINE: ' + err.message);
+    }
+  }
 }
 
 window.notificationEngine = new NotificationEngine();

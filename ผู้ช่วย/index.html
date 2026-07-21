@@ -133,6 +133,25 @@
         </button>
       </div>
 
+      <!-- LINE Notify Integration Card -->
+      <div style="margin-top: 14px; background: rgba(6, 199, 85, 0.1); border: 1px solid rgba(6, 199, 85, 0.3); border-radius: 12px; padding: 12px;">
+        <div style="font-size: 13px; font-weight: 600; color: #06c755; display: flex; align-items: center; gap: 6px;">
+          💬 ระบบเด้งเตือนเข้าแอป LINE (เหมือนคนทักแชท)
+        </div>
+        <div style="font-size: 11px; color: var(--text-sub); margin-top: 4px;">
+          เด้งป้าย Notification + เสียงแชท LINE บนหน้าจอล็อค iPad 100%
+        </div>
+        <div style="display: flex; gap: 6px; margin-top: 8px;">
+          <input type="text" id="lineTokenInput" class="form-input" style="font-size: 11px; padding: 6px 10px;" placeholder="วาง LINE Notify Token ที่นี่">
+          <button type="button" class="action-btn" id="saveLineTokenBtn" style="border-color: #06c755; color: #06c755; font-size: 11px; white-space: nowrap;">💾 บันทึก</button>
+        </div>
+        <div style="display: flex; gap: 6px; margin-top: 6px;">
+          <button type="button" class="preset-chip" id="testLineNotifyBtn" style="width: 100%; border-color: #06c755; color: #06c755; background: rgba(6, 199, 85, 0.15); padding: 8px; justify-content: center;">
+            🧪 ทดสอบยิงข้อความเข้า LINE iPad ทันที
+          </button>
+        </div>
+      </div>
+
       <div class="setting-row" style="margin-top: 8px;">
         <div class="setting-title">🎭 บุคลิกภาพการพูดของผู้ช่วย</div>
       </div>
@@ -154,7 +173,8 @@
       <div class="section-title">
         <span>⏰</span> ตารางเวลา & วินัยประจำวัน
       </div>
-      <div style="display: flex; gap: 6px;">
+      <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+        <button class="action-btn" id="exportCalendarBtn" style="border-color: #f59e0b; color: #fbbf24; font-weight: 600;">📅 ส่งเข้าปฏิทิน iPad</button>
         <button class="action-btn" id="openAddModalBtn">➕ เพิ่มภารกิจ</button>
       </div>
     </div>

@@ -855,7 +855,66 @@ class DisciplineApp {
     }
   }
 
+  exportToAppleCalendar() {
+    if (this.tasks.length === 0) {
+      alert('ยังไม่มีตารางเวลาในระบบ เพิ่มภารกิจก่อนกดส่งเข้าปฏิทิน iPad นะครับ');
+      return;
+    }
+
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const todayStr = `${year}${month}${day}`;
+
+    let icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Personal Secretary//Discipline Calendar//TH',
+      'CALSCALE:GREGORIAN',
+      'METHOD:PUBLISH',
+      'X-WR-CALNAME:ตารางวินัยผู้ช่วยส่วนตัว'
+    ];
+
+    this.tasks.forEach(task => {
+      if (task.active === false) return;
+      const [hrs, mins] = task.time.split(':');
+      const timeStr = `${hrs}${mins}00`;
+      const uid = `task-${task.id}@mysecretary.app`;
+      const title = task.title;
+      const alertText = task.customAlert || `ได้เวลา ${task.title} แล้วครับ!`;
+
+      icsContent.push('BEGIN:VEVENT');
+      icsContent.push(`UID:${uid}`);
+      icsContent.push(`DTSTAMP:${todayStr}T${timeStr}`);
+      icsContent.push(`DTSTART;TZID=Asia/Bangkok:${todayStr}T${timeStr}`);
+      icsContent.push(`DTEND;TZID=Asia/Bangkok:${todayStr}T${timeStr}`);
+      icsContent.push(`SUMMARY:⏰ ${title}`);
+      icsContent.push(`DESCRIPTION:${alertText}`);
+      icsContent.push('BEGIN:VALARM');
+      icsContent.push('TRIGGER:PT0M');
+      icsContent.push('ACTION:DISPLAY');
+      icsContent.push(`DESCRIPTION:${alertText}`);
+      icsContent.push('END:VALARM');
+      icsContent.push('END:VEVENT');
+    });
+
+    icsContent.push('END:VCALENDAR');
+
+    const blob = new Blob([icsContent.join('\r\n')], { type: 'text/calendar;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `ตารางเวลาผู้ช่วย_${todayStr}.ics`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
   bindEvents() {
+    // Apple Calendar Export Button
+    document.getElementById('exportCalendarBtn')?.addEventListener('click', () => {
+      this.exportToAppleCalendar();
+    });
     // Master Switch Toggle
     document.getElementById('masterNotifSwitch')?.addEventListener('change', (e) => {
       this.masterNotifEnabled = e.target.checked;
@@ -901,6 +960,31 @@ class DisciplineApp {
       } catch(err) {
         alert('⚠️ เกิดข้อผิดพลาดในการลงทะเบียน: ' + err.message);
       }
+    });
+
+    // LINE Notify Token Handlers
+    const savedLineToken = localStorage.getItem('secretary_line_token') || '';
+    const lineTokenInput = document.getElementById('lineTokenInput');
+    if (lineTokenInput) lineTokenInput.value = savedLineToken;
+
+    document.getElementById('saveLineTokenBtn')?.addEventListener('click', () => {
+      const val = document.getElementById('lineTokenInput')?.value.trim();
+      if (val) {
+        localStorage.setItem('secretary_line_token', val);
+        alert('💾 บันทึก LINE Notify Token เรียบร้อยแล้วครับ!');
+      } else {
+        localStorage.removeItem('secretary_line_token');
+        alert('ลบ LINE Notify Token เรียบร้อยแล้ว');
+      }
+    });
+
+    document.getElementById('testLineNotifyBtn')?.addEventListener('click', () => {
+      const val = document.getElementById('lineTokenInput')?.value.trim();
+      if (!val) {
+        alert('กรุณากรอกและบันทึก LINE Notify Token ก่อนกดทดสอบครับ');
+        return;
+      }
+      window.notificationEngine.sendLineNotify('💬 [ผู้ช่วยส่วนตัว] ทดสอบเด้งเตือนเข้าแอป LINE บน iPad เรียบร้อยแล้วครับ!', val);
     });
 
     // Step 2: Instant Cloud Push Test Button
