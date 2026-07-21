@@ -879,7 +879,25 @@ class DisciplineApp {
       }
     });
 
-    // Instant Cloud Push Test Button
+    // Step 1: Subscribe OneSignal Cloud Push Button
+    document.getElementById('subscribeOneSignalBtn')?.addEventListener('click', () => {
+      if (window.OneSignalDeferred) {
+        window.OneSignalDeferred.push(async function(OneSignal) {
+          try {
+            await OneSignal.Notifications.requestPermission();
+            await OneSignal.User.pushSubscription.optIn();
+            const subId = OneSignal.User.pushSubscription.id;
+            alert('✅ ลงทะเบียน iPad เข้าสู่คลาวด์สำเร็จเรียบร้อยครับ!\n\n(ID เครื่องของคุณ: ' + (subId || 'อนุมัติเรียบร้อย') + ')\n\nจากนั้นกดปุ่ม Step 2 ด้านล่างเพื่อทดสอบได้เลยครับ!');
+          } catch(err) {
+            alert('⚠️ เกิดข้อผิดพลาดในการลงทะเบียน: ' + err.message);
+          }
+        });
+      } else {
+        alert('OneSignal SDK กำลังโหลด กรุณาลองใหม่อีกครั้งใน 3 วินาที');
+      }
+    });
+
+    // Step 2: Instant Cloud Push Test Button
     document.getElementById('testCloudPushBtn')?.addEventListener('click', () => {
       window.notificationEngine.sendInstantCloudPush(
         '🔔 ทดสอบเด้งเตือนคลาวด์ลง iPad!',
