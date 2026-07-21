@@ -826,6 +826,23 @@ class DisciplineApp {
       this.saveData();
       if (this.masterNotifEnabled) {
         window.notificationEngine.requestPermission();
+        window.secretaryAudio.enableBackgroundKeepAlive();
+      }
+    });
+
+    // Enable Background Lock Screen Mode Button
+    document.getElementById('enableBackgroundModeBtn')?.addEventListener('click', () => {
+      window.notificationEngine.requestPermission();
+      window.secretaryAudio.enableBackgroundKeepAlive();
+      alert('⚡ เปิดโหมดรักษาสัญญาณแจ้งเตือนขณะปิดหน้าจอเรียบร้อยแล้วครับ!\n\n💡 คำแนะนำเพิ่มเติมสำหรับโทรศัพท์มือถือ & iPad:\n1. ตรวจสอบให้แน่ใจว่าได้กด "อนุญาต" การแจ้งเตือน Notification แล้ว\n2. สวิตช์ปิดเสียงข้างเครื่อง (Mute Switch) ต้องไม่ปิดไว้\n3. เพิ่มแอปเข้าหน้าจอหลัก (Add to Home Screen) เพื่อความสมบูรณ์แบบสูงสุดครับ');
+    });
+
+    // Auto-sync & trigger alarms when waking up screen / unlocking phone
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) {
+        this.updateLiveClock();
+        const nowStr = this.getCurrentTimeString();
+        this.checkScheduleAlarms(nowStr);
       }
     });
 

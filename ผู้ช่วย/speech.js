@@ -9,7 +9,30 @@ class AudioSecretary {
     this.isSpeakingState = false;
     this.activeUtterance = null;
     this.onStateChange = null;
+    this.keepAliveAudio = null;
     this.initVoices();
+  }
+
+  enableBackgroundKeepAlive() {
+    try {
+      if (!this.keepAliveAudio) {
+        // 1-second Silent WAV base64 loop
+        const silentUri = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+        this.keepAliveAudio = new Audio(silentUri);
+        this.keepAliveAudio.loop = true;
+      }
+      this.keepAliveAudio.play().then(() => {
+        console.log('Background Keep-Alive Audio active for lock screen alarms');
+      }).catch(err => console.log('Keep-alive play error (needs user interaction):', err));
+    } catch (e) {
+      console.log('Keep-alive error:', e);
+    }
+  }
+
+  disableBackgroundKeepAlive() {
+    if (this.keepAliveAudio) {
+      this.keepAliveAudio.pause();
+    }
   }
 
   setGender(gender) {

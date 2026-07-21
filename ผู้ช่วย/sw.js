@@ -27,12 +27,28 @@ self.addEventListener('fetch', (e) => {
   );
 });
 
+self.addEventListener('message', (e) => {
+  if (e.data && e.data.type === 'SCHEDULE_NOTIFICATION') {
+    const title = e.data.title || '⏰ เตือนความจำ';
+    const options = {
+      body: e.data.body || 'ได้เวลาทำภารกิจแล้วครับ!',
+      icon: './icon-192.png',
+      badge: './icon-192.png',
+      vibrate: [300, 100, 300, 100, 300],
+      renotify: true,
+      tag: e.data.taskId || 'alarm-tag',
+      data: { taskId: e.data.taskId }
+    };
+    self.registration.showNotification(title, options);
+  }
+});
+
 self.addEventListener('notificationclick', (e) => {
   e.notification.close();
   e.waitUntil(
-    clients.matchAll({ type: 'window' }).then((clientList) => {
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       for (const client of clientList) {
-        if (client.url && 'focus' in client) {
+        if ('focus' in client) {
           return client.focus();
         }
       }
